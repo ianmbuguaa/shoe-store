@@ -2,7 +2,7 @@
 const products = [
   {
     id: 1,
-    name: "Air Runner Pro",
+    name: "Akala 1",
     price: 129.99,
     image: "images/shoe1.jpg",
     category: "Running"
