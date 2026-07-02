@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us – Kodowaina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo">Kodowaina</div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html" class="active">Contact</a></li>
+      </ul>
+      <div class="cart-icon"><a href="cart.html" style="color:inherit;">🛒 <span id="cart-count">0</span></a></div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <h1>Contact Us</h1>
+      <p>We'd love to hear from you. Reach out any time.</p>
+    </section>
+
+    <section class="contact-section">
+      <div class="contact-grid">
+
+        <div class="contact-info">
+          <h2>Get in Touch</h2>
+          <div class="info-item">
+            <span class="info-icon">📍</span>
+            <div>
+              <strong>Address</strong>
+              <p>14 Sneaker Lane, Westlands<br />Nairobi, Kenya</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">📞</span>
+            <div>
+              <strong>Phone</strong>
+              <p>+254 700 123 456</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">✉️</span>
+            <div>
+              <strong>Email</strong>
+              <p>hello@Kodowainastore.co.ke</p>
+            </div>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🕐</span>
+            <div>
+              <strong>Store Hours</strong>
+              <p>Mon – Sat: 9 AM – 7 PM<br />Sunday: 10 AM – 4 PM</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-form-wrapper">
+          <h2>Send a Message</h2>
+          <form id="contact-form" novalidate>
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" placeholder="Jane Doe" required />
+              <span class="field-error" id="name-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" name="email" placeholder="jane@example.com" required />
+              <span class="field-error" id="email-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="subject">Subject</label>
+              <input type="text" id="subject" name="subject" placeholder="Order enquiry, returns…" required />
+              <span class="field-error" id="subject-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="5" placeholder="Tell us how we can help…" required></textarea>
+              <span class="field-error" id="message-error"></span>
+            </div>
+            <button type="submit" class="btn checkout-btn">Send Message</button>
+            <p id="form-success" class="form-success" aria-live="polite"></p>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">Kodowaina</span>
+        <p>Natural footwear for every journey.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="cart.html">Your Cart</a></li>
+          <li><a href="contact.html">Returns</a></li>
+          <li><a href="contact.html">Shipping Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Kodowaina Shoe Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/contact.js"></script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shop – Kodwaina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="color:inherit;">Kodwaina</a></div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html" class="active">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="cart-icon"><a href="cart.html" style="color:inherit;">🛒 <span id="cart-count">0</span></a></div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page-header">
+      <h1>All Shoes</h1>
+      <p>Browse our full collection of footwear.</p>
+    </section>
+
+    <section class="shop-controls">
+      <input type="text" id="search" placeholder="Search shoes..." />
+      <select id="category-filter">
+        <option value="all">All Categories</option>
+        <option value="Running">Running</option>
+        <option value="Casual">Casual</option>
+        <option value="Sneakers">Sneakers</option>
+        <option value="Outdoor">Outdoor</option>
+      </select>
+    </section>
+
+    <section class="products">
+      <div class="product-grid" id="product-grid">
+        <!-- Products injected by shop.js -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">Kodwaina</span>
+        <p>Natural footwear for every journey.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="cart.html">Your Cart</a></li>
+          <li><a href="contact.html">Returns</a></li>
+          <li><a href="contact.html">Shipping Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Kodwaina Shoe Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/shop.js"></script>
+</body>
+</html>

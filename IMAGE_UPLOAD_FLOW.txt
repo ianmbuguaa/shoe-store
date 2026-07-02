@@ -1,0 +1,237 @@
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║           IMAGE UPLOAD SYSTEM - HOW IT WORKS                      ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 1: YOU (Admin)                                            │
+│  ─────────────────────                                          │
+│                                                                 │
+│  1. Login to admin panel (admin/login.html)                     │
+│  2. Click "Add Product" button                                  │
+│  3. Fill in product details:                                    │
+│     • Name (e.g., "Nike Air Max")                               │
+│     • Category (e.g., "Running")                                │
+│     • Price (e.g., 129.99)                                      │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 2: SELECT IMAGE                                           │
+│  ──────────────────────                                         │
+│                                                                 │
+│  1. Click "Choose File"                                         │
+│  2. Browse your computer                                        │
+│  3. Select product image:                                       │
+│     • JPG, PNG, GIF, or WebP                                    │
+│     • Max 5MB file size                                         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 3: UPLOAD TO CLOUD                                        │
+│  ────────────────────────                                       │
+│                                                                 │
+│  1. Click "Upload Image" button                                 │
+│  2. JavaScript sends file to Supabase Storage                   │
+│  3. File uploaded to:                                           │
+│     → Bucket: product-images                                    │
+│     → Path: products/[timestamp]_[random].jpg                   │
+│                                                                 │
+│  4. Supabase generates public URL:                              │
+│     https://bgmutbfurqlgyszbkyxs.supabase.co/                   │
+│     storage/v1/object/public/product-images/                    │
+│     products/1234567890_abc123.jpg                              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 4: CONFIRM UPLOAD                                         │
+│  ────────────────────────                                       │
+│                                                                 │
+│  ✓ Success message appears:                                     │
+│    "✓ Image uploaded successfully!"                             │
+│                                                                 │
+│  Image URL is stored temporarily                                │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 5: SAVE PRODUCT                                           │
+│  ──────────────────────                                         │
+│                                                                 │
+│  1. Click "Save Product"                                        │
+│  2. Product data saved to Supabase database:                    │
+│                                                                 │
+│     Table: products                                             │
+│     ┌──────────────────────────────────────────────┐           │
+│     │ id       │ 1                                 │           │
+│     │ name     │ "Nike Air Max"                    │           │
+│     │ category │ "Running"                         │           │
+│     │ price    │ 129.99                            │           │
+│     │ image_url│ https://...product-images/.../... │           │
+│     └──────────────────────────────────────────────┘           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                                                                 │
+│  STEP 6: DISPLAY ON WEBSITE                                     │
+│  ────────────────────────────                                   │
+│                                                                 │
+│  Product automatically appears on:                              │
+│  • Shop page (shop.html)                                        │
+│  • Homepage featured products                                   │
+│  • Admin dashboard                                              │
+│                                                                 │
+│  Image loads from Supabase cloud:                               │
+│  <img src="https://...supabase.co/.../image.jpg" />            │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                    WHERE YOUR IMAGES LIVE                         ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+NOT stored locally in:
+  ❌ c:\Users\IAN\Documents\shoe-store\images\
+  (This folder is now just for backward compatibility)
+
+STORED in Supabase Cloud:
+  ✅ Bucket: product-images
+  ✅ Path: products/[filename]
+  ✅ Public URL: https://bgmutbfurqlgyszbkyxs.supabase.co/...
+  ✅ Accessible from anywhere on the internet
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                      BENEFITS OF CLOUD STORAGE                    ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+✓ No manual file management
+  → No need to manually copy files to images folder
+  → Upload directly from browser
+
+✓ Accessible anywhere
+  → Images load from cloud (fast CDN)
+  → Works on any device
+
+✓ Automatic URLs
+  → Public URLs generated instantly
+  → No need to track file paths
+
+✓ Scalable
+  → Store unlimited images
+  → No local storage limits
+
+✓ Secure
+  → Only you can upload (requires login)
+  → Everyone can view (public bucket)
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                    TECHNICAL ARCHITECTURE                         ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+Your Computer              Supabase Cloud
+─────────────              ──────────────
+
+Browser                    Authentication Service
+  ↓ login                    ↓ verify session
+  ↓                          ↓
+Admin Panel  ─────────→    Storage API
+  ↓ upload image            ↓ save file
+  ↓                          ↓
+  ↓                     Storage Bucket
+  ↓                     (product-images)
+  ↓                          ↓
+  ↓ save product            ↓ generate URL
+  ↓                          ↓
+  ↓                     PostgreSQL Database
+  └──────────────────→    (products table)
+                             ↓
+                        Public URL stored
+                             ↓
+                        Website loads image
+                        from Supabase CDN
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                          FILE FORMATS                             ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+SUPPORTED:
+  ✓ JPG/JPEG  → .jpg, .jpeg
+  ✓ PNG       → .png
+  ✓ GIF       → .gif (animated supported)
+  ✓ WebP      → .webp
+
+LIMITS:
+  • Max file size: 5MB
+  • Recommended: 400x400px to 1200x1200px
+  • Aspect ratio: Square or 4:3 works best
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                        EXAMPLE UPLOAD                             ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+You upload:
+  → nike-air-max.jpg (from Desktop)
+  → Size: 2.3 MB
+
+System processes:
+  → Validates file type ✓
+  → Checks size ✓
+  → Generates unique name: 1735845632_x7k9p2.jpg
+  → Uploads to: products/1735845632_x7k9p2.jpg
+  → Creates public URL ✓
+
+Result:
+  → Image URL: https://bgmutbfurqlgyszbkyxs.supabase.co/
+                storage/v1/object/public/product-images/
+                products/1735845632_x7k9p2.jpg
+
+  → Saved in database:
+     products.image_url = "https://..."
+
+  → Displayed on website:
+     <img src="https://..." alt="Nike Air Max" />
+
+
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║                      READY TO START?                              ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+
+1. Open: admin/setup.html (create account)
+2. Verify your email
+3. Open: admin/login.html
+4. Click: Add Product
+5. Fill in details
+6. Upload your first image!
+
+═══════════════════════════════════════════════════════════════════
+
+Questions? See ADMIN_SETUP.md for complete documentation.
+
+═══════════════════════════════════════════════════════════════════

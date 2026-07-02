@@ -3,41 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shoe Store</title>
+  <title>Kodwaina – Natural Footwear</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
 
+  <!-- ===== ANNOUNCEMENT BAR ===== -->
+  <div class="announcement">Free shipping on orders over $80 &nbsp;·&nbsp; New collection just dropped</div>
+
+  <!-- ===== NAVBAR ===== -->
   <header>
     <nav>
-      <div class="logo">👟 StepUp</div>
+      <div class="logo">Kodwaina</div>
       <ul class="nav-links">
-        <li><a href="#">Home</a></li>
-        <li><a href="#">Shop</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
       </ul>
-      <div class="cart-icon">🛒 <span id="cart-count">0</span></div>
+      <div class="cart-icon"><a href="cart.html" aria-label="View cart">🛒 <span id="cart-count">0</span></a></div>
     </nav>
   </header>
 
   <main>
-    <section class="hero">
-      <h1>Step Into Style</h1>
-      <p>Discover the latest footwear for every occasion.</p>
-      <a href="#products" class="btn">Shop Now</a>
-    </section>
 
-    <section id="products" class="products">
-      <h2>Featured Shoes</h2>
-      <div class="product-grid" id="product-grid">
-        <!-- Products injected by script.js -->
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+      <div class="hero-content">
+        <span class="hero-tag">New Collection 2026</span>
+        <h1>Walk the Earth<br />Feel the Ground</h1>
+        <p>Sandals and footwear crafted from natural materials — for the beach, the trail, and everywhere between.</p>
+        <div class="hero-btns">
+          <a href="shop.html" class="btn btn-primary">Shop Collection</a>
+          <a href="#categories" class="btn btn-outline">Browse Categories</a>
+        </div>
+      </div>
+      <div class="hero-badge">
+        <span>🌊</span>
+        <p>Beach-Ready<br />Since 2018</p>
       </div>
     </section>
+
+    <!-- ===== FEATURED SANDALS ===== -->
+    <section id="products" class="products">
+      <div class="section-header">
+        <span class="section-tag">Just In</span>
+        <h2>Featured Sandals</h2>
+        <p>Handpicked styles for the season</p>
+      </div>
+      <div class="product-grid" id="product-grid">
+        <!-- Injected by script.js -->
+      </div>
+      <div class="section-cta">
+        <a href="shop.html" class="btn btn-outline">See All Products</a>
+      </div>
+    </section>
+
+    <!-- ===== CATEGORIES ===== -->
+    <section id="categories" class="categories-section">
+      <div class="section-header">
+        <span class="section-tag">Collections</span>
+        <h2>Shop by Category</h2>
+      </div>
+      <div class="categories-grid">
+        <a href="shop.html" class="category-tile tile-beach">
+          <span class="tile-icon">🏖️</span>
+          <h3>Beach</h3>
+          <p>Sandals for sand & surf</p>
+        </a>
+        <a href="shop.html" class="category-tile tile-trail">
+          <span class="tile-icon">🌿</span>
+          <h3>Trail</h3>
+          <p>Grounded outdoor soles</p>
+        </a>
+        <a href="shop.html" class="category-tile tile-casual">
+          <span class="tile-icon">☀️</span>
+          <h3>Casual</h3>
+          <p>Everyday natural comfort</p>
+        </a>
+        <a href="shop.html" class="category-tile tile-eco">
+          <span class="tile-icon">♻️</span>
+          <h3>Eco</h3>
+          <p>Sustainable materials</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- ===== BEST SELLERS ===== -->
+    <section class="best-sellers">
+      <div class="section-header">
+        <span class="section-tag">Fan Favourites</span>
+        <h2>Best Sellers</h2>
+        <p>What everyone is walking in right now</p>
+      </div>
+      <div class="best-sellers-grid" id="best-sellers-grid">
+        <!-- Injected by script.js -->
+      </div>
+    </section>
+
+    <!-- ===== CALL TO ACTION ===== -->
+    <section class="cta-section">
+      <div class="cta-inner">
+        <span class="cta-icon">🌴</span>
+        <h2>Your Next Adventure Starts Here</h2>
+        <p>Free shipping on all orders over $80. Easy returns. No fuss, just good shoes.</p>
+        <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+      </div>
+    </section>
+
   </main>
 
+  <!-- ===== FOOTER ===== -->
   <footer>
-    <p>&copy; 2026 StepUp Shoe Store. All rights reserved.</p>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">Kodwaina</span>
+        <p>Natural footwear for every journey.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="cart.html">Your Cart</a></li>
+          <li><a href="contact.html">Returns</a></li>
+          <li><a href="contact.html">Shipping Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Kodwaina Shoe Store. All rights reserved.</p>
+    </div>
   </footer>
 
   <script src="js/script.js"></script>

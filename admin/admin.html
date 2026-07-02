@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin – Kodwaina
+    
+  </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../css/styles.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <header>
+    <nav>
+      <div class="logo">👟 Kodwaina
+         <span class="admin-badge">Admin</span></div>
+      <ul class="nav-links">
+        <li><a href="#products">Products</a></li>
+        <li><a href="#orders">Orders</a></li>
+        <li><span id="admin-email" style="color: var(--text-mid); font-size: 0.85rem;"></span></li>
+      </ul>
+      <div style="display: flex; gap: 0.5rem;">
+        <a href="../index.html" class="btn" style="font-size:0.85rem; padding:0.4rem 1rem;">View Store</a>
+        <button id="logout-btn" class="btn" style="font-size:0.85rem; padding:0.4rem 1rem; background: var(--text-dark);">Logout</button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="admin-main">
+
+    <aside class="admin-sidebar">
+      <ul>
+        <li><a href="#products" class="active">📦 Products</a></li>
+        <li><a href="#orders">🧾 Orders</a></li>
+        <li><a href="#customers">👥 Customers</a></li>
+        <li><a href="#settings">⚙️ Settings</a></li>
+      </ul>
+    </aside>
+
+    <section class="admin-content">
+
+      <div id="products" class="admin-panel">
+        <div class="panel-header">
+          <h2>Products</h2>
+          <button class="btn" id="add-product-btn">+ Add Product</button>
+        </div>
+        <table class="admin-table" id="products-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="products-tbody">
+            <!-- Injected by admin.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="orders" class="admin-panel" style="display:none;">
+        <div class="panel-header">
+          <h2>Orders</h2>
+        </div>
+        <p class="empty-state">No orders yet.</p>
+      </div>
+
+      <div id="customers" class="admin-panel" style="display:none;">
+        <div class="panel-header">
+          <h2>Customers</h2>
+        </div>
+        <p class="empty-state">No customers yet.</p>
+      </div>
+
+      <div id="settings" class="admin-panel" style="display:none;">
+        <div class="panel-header">
+          <h2>Settings</h2>
+        </div>
+        <p class="empty-state">Settings coming soon.</p>
+      </div>
+
+    </section>
+  </main>
+
+  <script type="module" src="../js/admin.js"></script>
+</body>
+</html>
