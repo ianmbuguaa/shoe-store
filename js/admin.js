@@ -22,10 +22,34 @@ async function checkAuth() {
   currentUser = session.user;
   document.getElementById('admin-email').textContent = currentUser.email;
   
+  // Set up logout button handler
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+      console.log('Logout button clicked');
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+          console.error('Logout error:', error);
+          alert('Error logging out: ' + error.message);
+        } else {
+          console.log('Logout successful, redirecting...');
+          window.location.href = 'login.html';
+        }
+      } catch (err) {
+        console.error('Logout exception:', err);
+        alert('Error logging out. Please try again.');
+      }
+    });
+  } else {
+    console.error('Logout button not found!');
+  }
+  
   // Set up auth state listener for session changes
   supabase.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_OUT') {
       // User signed out - redirect to login
+      console.log('Auth state: SIGNED_OUT, redirecting to login');
       window.location.href = 'login.html';
     } else if (event === 'TOKEN_REFRESHED') {
       // Session refreshed successfully
@@ -33,12 +57,6 @@ async function checkAuth() {
     }
   });
 }
-
-// Logout
-document.getElementById('logout-btn').addEventListener('click', async () => {
-  await supabase.auth.signOut();
-  window.location.href = 'login.html';
-});
 
 // ===== Product Data (load from Supabase) =====
 let products = [];

@@ -7,6 +7,13 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// Debug logging
+console.log('Supabase client initialized');
+console.log('URL:', SUPABASE_URL);
+
+// Flag to indicate module loaded successfully
+window.supabaseLoaded = true;
+
 // Show/hide messages
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
@@ -38,6 +45,8 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
   const password = document.getElementById('password').value;
   const loginBtn = document.getElementById('login-btn');
   
+  console.log('Login attempt:', email);
+  
   loginBtn.disabled = true;
   loginBtn.textContent = 'Signing in...';
   
@@ -47,12 +56,16 @@ document.getElementById('login-form').addEventListener('submit', async (e) => {
       password
     });
     
+    console.log('Login response:', { data, error });
+    
     if (error) throw error;
     
+    console.log('Login successful!');
     showSuccess('Login successful! Redirecting...');
     setTimeout(() => window.location.href = 'admin.html', 1000);
     
   } catch (error) {
+    console.error('Login error:', error);
     showError(error.message || 'Login failed. Please check your credentials.');
   } finally {
     loginBtn.disabled = false;
