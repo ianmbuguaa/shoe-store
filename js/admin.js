@@ -103,7 +103,9 @@ function renderTable() {
       <td>${p.id}</td>
       <td>${p.name}</td>
       <td>${p.category}</td>
-      <td>$${parseFloat(p.price).toFixed(2)}</td>
+      <td>KSh ${parseFloat(p.price).toFixed(2)}</td>
+      <td>${p.size || 'N/A'}</td>
+      <td>${p.quantity !== undefined ? p.quantity : 'N/A'}</td>
       <td>
         <button class="btn-sm edit-btn" data-id="${p.id}">Edit</button>
         <button class="btn-sm delete-btn danger" data-id="${p.id}">Delete</button>
@@ -189,8 +191,12 @@ function openModal(product = null) {
   const modal = document.createElement("div");
   modal.id = "product-modal";
   modal.classList.add("modal-overlay");
+  
+  // Parse existing images if available
+  const existingImages = product && product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [];
+  
   modal.innerHTML = `
-    <div class="modal" style="max-width: 500px;">
+    <div class="modal" style="max-width: 600px;">
       <h3>${product ? "Edit Product" : "Add Product"}</h3>
       <label>Name<input id="m-name" type="text" value="${product ? product.name : ""}" /></label>
       <label>Category
@@ -200,22 +206,38 @@ function openModal(product = null) {
           ).join("")}
         </select>
       </label>
-      <label>Price<input id="m-price" type="number" step="0.01" value="${product ? product.price : ""}" /></label>
+      <label>Price (KSh)<input id="m-price" type="number" step="0.01" value="${product ? product.price : ""}" /></label>
+      <label>Size (EU)<input id="m-size" type="text" placeholder="e.g., 39, 40, 41, 42, 43" value="${product ? (product.size || "") : ""}" /></label>
+      <label>Quantity<input id="m-quantity" type="number" min="0" value="${product ? (product.quantity || 0) : 0}" /></label>
       
       <div style="margin: 1rem 0;">
-        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Product Image</label>
-        <div style="display: flex; gap: 1rem; align-items: center;">
-          <input id="m-image-file" type="file" accept="image/*" style="flex: 1;" />
-          <button type="button" class="btn-sm" id="upload-btn" style="white-space: nowrap;">Upload Image</button>
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Product Images</label>
+        <p style="font-size: 0.8rem; color: var(--text-mid); margin-bottom: 0.75rem;">Upload multiple images (front, side, sole, etc.)</p>
+        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+          <input id="m-image-file" type="file" accept="image/*" multiple style="flex: 1;" />
+          <button type="button" class="btn-sm" id="upload-btn" style="white-space: nowrap;">Upload Images</button>
         </div>
-        ${product && product.image_url ? `
-          <div style="margin-top: 1rem;">
-            <img src="${product.image_url}" alt="Current" style="max-width: 150px; border-radius: 4px; border: 1px solid var(--border);" />
-            <p style="font-size: 0.8rem; color: var(--text-mid); margin-top: 0.5rem;">Current image</p>
-          </div>
-        ` : ''}
-        <input id="m-image-url" type="hidden" value="${product ? (product.image_url || '') : ''}" />
-        <p id="upload-status" style="font-size: 0.85rem; color: var(--sage); margin-top: 0.5rem;"></p>
+        
+        <div id="uploaded-images" style="margin-top: 1rem;">
+          ${existingImages.length > 0 ? `
+            <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Current Images:</p>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              ${existingImages.map((url, index) => `
+                <div style="position: relative;">
+                  <img src="${url}" alt="Product ${index + 1}" 
+                       style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid var(--border);" />
+                  <button type="button" class="remove-image-btn" data-url="${url}" 
+                          style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; 
+                                 border-radius: 50%; background: #e94560; color: white; border: none; 
+                                 cursor: pointer; font-size: 0.75rem; font-weight: bold;">✕</button>
+                </div>
+              `).join('')}
+            </div>
+          ` : '<p style="font-size: 0.85rem; color: var(--text-light);">No images uploaded yet</p>'}
+        </div>
+        
+        <input id="m-images-urls" type="hidden" value="${existingImages.join(',')}" />
+        <p id="upload-status" style="font-size: 0.85rem; color: var(--sage); margin-top: 0.75rem;"></p>
       </div>
       
       <div class="modal-actions">
@@ -226,38 +248,78 @@ function openModal(product = null) {
   `;
   document.body.appendChild(modal);
 
-  // Upload button handler
+  let uploadedImageUrls = [...existingImages];
+
+  // Remove image handler
+  modal.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-image-btn')) {
+      const urlToRemove = e.target.dataset.url;
+      uploadedImageUrls = uploadedImageUrls.filter(url => url !== urlToRemove);
+      document.getElementById('m-images-urls').value = uploadedImageUrls.join(',');
+      e.target.closest('div').remove();
+      
+      if (uploadedImageUrls.length === 0) {
+        document.getElementById('uploaded-images').innerHTML = 
+          '<p style="font-size: 0.85rem; color: var(--text-light);">No images uploaded yet</p>';
+      }
+    }
+  });
+
+  // Upload button handler - supports multiple files
   document.getElementById("upload-btn").addEventListener("click", async () => {
     const fileInput = document.getElementById("m-image-file");
-    const file = fileInput.files[0];
+    const files = Array.from(fileInput.files);
     const statusEl = document.getElementById("upload-status");
     const uploadBtn = document.getElementById("upload-btn");
     
-    if (!file) {
-      statusEl.textContent = 'Please select an image first';
+    if (files.length === 0) {
+      statusEl.textContent = 'Please select at least one image';
       statusEl.style.color = '#c33';
       return;
     }
     
     uploadBtn.disabled = true;
-    uploadBtn.textContent = 'Uploading...';
-    statusEl.textContent = 'Uploading image...';
+    uploadBtn.textContent = `Uploading ${files.length} image(s)...`;
+    statusEl.textContent = 'Uploading images...';
     statusEl.style.color = 'var(--sage)';
     
-    const imageUrl = await uploadImage(file);
+    const uploadPromises = files.map(file => uploadImage(file));
+    const results = await Promise.all(uploadPromises);
     
-    if (imageUrl) {
-      document.getElementById("m-image-url").value = imageUrl;
-      statusEl.textContent = '✓ Image uploaded successfully!';
+    const successfulUploads = results.filter(url => url !== null);
+    
+    if (successfulUploads.length > 0) {
+      uploadedImageUrls.push(...successfulUploads);
+      document.getElementById("m-images-urls").value = uploadedImageUrls.join(',');
+      
+      // Update display
+      const uploadedImagesDiv = document.getElementById('uploaded-images');
+      uploadedImagesDiv.innerHTML = `
+        <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Current Images:</p>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          ${uploadedImageUrls.map((url, index) => `
+            <div style="position: relative;">
+              <img src="${url}" alt="Product ${index + 1}" 
+                   style="width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 2px solid var(--border);" />
+              <button type="button" class="remove-image-btn" data-url="${url}" 
+                      style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; 
+                             border-radius: 50%; background: #e94560; color: white; border: none; 
+                             cursor: pointer; font-size: 0.75rem; font-weight: bold;">✕</button>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      
+      statusEl.textContent = `✓ ${successfulUploads.length} image(s) uploaded successfully!`;
       statusEl.style.color = 'var(--sage)';
-      uploadBtn.textContent = 'Upload Image';
-      uploadBtn.disabled = false;
+      fileInput.value = ''; // Clear file input
     } else {
       statusEl.textContent = '✗ Upload failed';
       statusEl.style.color = '#c33';
-      uploadBtn.textContent = 'Upload Image';
-      uploadBtn.disabled = false;
     }
+    
+    uploadBtn.textContent = 'Upload Images';
+    uploadBtn.disabled = false;
   });
 
   document.getElementById("m-cancel").addEventListener("click", () => modal.remove());
@@ -266,16 +328,26 @@ function openModal(product = null) {
     const name     = document.getElementById("m-name").value.trim();
     const category = document.getElementById("m-category").value;
     const price    = parseFloat(document.getElementById("m-price").value);
-    const imageUrl = document.getElementById("m-image-url").value.trim();
+    const size     = document.getElementById("m-size").value.trim();
+    const quantity = parseInt(document.getElementById("m-quantity").value);
+    const imagesUrls = document.getElementById("m-images-urls").value.trim();
 
     if (!name || isNaN(price)) {
       alert("Please fill in all required fields.");
       return;
     }
 
+    if (isNaN(quantity) || quantity < 0) {
+      alert("Please enter a valid quantity (0 or more).");
+      return;
+    }
+
     const saveBtn = document.getElementById("m-save");
     saveBtn.disabled = true;
     saveBtn.textContent = 'Saving...';
+
+    // Use first image as primary image_url for backward compatibility
+    const primaryImageUrl = uploadedImageUrls.length > 0 ? uploadedImageUrls[0] : null;
 
     if (product) {
       // Update existing product
@@ -285,7 +357,10 @@ function openModal(product = null) {
           name, 
           category, 
           price, 
-          image_url: imageUrl || null,
+          size: size || null,
+          quantity,
+          image_url: primaryImageUrl,
+          images: imagesUrls || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', product.id);
@@ -297,12 +372,20 @@ function openModal(product = null) {
         return;
       }
       
-      Object.assign(product, { name, category, price, image_url: imageUrl });
+      Object.assign(product, { name, category, price, size, quantity, image_url: primaryImageUrl, images: imagesUrls });
     } else {
       // Insert new product
       const { data, error } = await supabase
         .from('products')
-        .insert([{ name, category, price, image_url: imageUrl || null }])
+        .insert([{ 
+          name, 
+          category, 
+          price, 
+          size: size || null, 
+          quantity, 
+          image_url: primaryImageUrl,
+          images: imagesUrls || null
+        }])
         .select();
       
       if (error) {
