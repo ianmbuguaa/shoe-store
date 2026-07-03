@@ -1,0 +1,172 @@
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                   ║
+║                    KODWAINA SHOE STORE - PRODUCT INVENTORY                        ║
+║                          20 Products | 1,808 Total Units                          ║
+║                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                              RUNNING SHOES (6)                                    │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+1. Nike Air Zoom Pegasus 40 - KSh 13,499
+   📦 Sizes: 38(8) 39(15) 40(22) 41(18) 42(12) 43(7) = 82 units
+
+2. Adidas Ultraboost 23 - KSh 15,999
+   📦 Sizes: 37(5) 38(10) 39(18) 40(25) 41(20) 42(15) 43(8) = 101 units
+
+5. New Balance 990v6 - KSh 17,999
+   📦 Sizes: 39(10) 40(15) 41(18) 42(20) 43(12) 44(6) = 81 units
+
+12. Asics Gel-Kayano 30 - KSh 14,499
+    📦 Sizes: 38(9) 39(14) 40(20) 41(18) 42(12) 43(7) = 80 units
+
+15. Hoka Clifton 9 - KSh 13,999
+    📦 Sizes: 38(8) 39(16) 40(22) 41(20) 42(14) 43(8) = 88 units
+
+20. Under Armour HOVR Phantom 3 - KSh 12,999
+    📦 Sizes: 38(10) 39(16) 40(20) 41(18) 42(14) 43(8) = 86 units
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                              CASUAL SHOES (4)                                     │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+3. Converse Chuck Taylor All Star - KSh 6,499
+   📦 Sizes: 36(12) 37(18) 38(20) 39(25) 40(22) 41(15) 42(10) = 122 units
+
+6. Vans Old Skool - KSh 5,999
+   📦 Sizes: 37(15) 38(22) 39(28) 40(25) 41(18) 42(12) 43(8) = 128 units
+
+11. Reebok Classic Leather - KSh 6,999
+    📦 Sizes: 38(16) 39(22) 40(20) 41(18) 42(14) 43(8) = 98 units
+
+16. Skechers Go Walk Max - KSh 5,499
+    📦 Sizes: 37(18) 38(24) 39(28) 40(25) 41(20) 42(15) 43(10) = 140 units
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                              SNEAKERS (3)                                         │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+4. Puma Suede Classic - KSh 7,999
+   📦 Sizes: 38(14) 39(20) 40(18) 41(16) 42(12) 43(8) = 88 units
+
+7. Jordan Retro 1 High OG - KSh 18,999 ⚠️ LIMITED EDITION
+   📦 Sizes: 40(3) 41(5) 42(4) 43(2) = 14 units
+
+19. Fila Disruptor II - KSh 7,499
+    📦 Sizes: 36(12) 37(18) 38(22) 39(20) 40(16) 41(12) 42(8) = 108 units
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                              OUTDOOR SHOES (3)                                    │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+10. Salomon Speedcross 5 - KSh 14,999
+    📦 Sizes: 39(7) 40(12) 41(15) 42(18) 43(10) 44(5) = 67 units
+
+17. Columbia Newton Ridge Plus - KSh 11,999
+    📦 Sizes: 39(10) 40(15) 41(18) 42(20) 43(12) 44(6) = 81 units
+
+18. Merrell Moab 3 - KSh 12,499
+    📦 Sizes: 39(8) 40(14) 41(18) 42(16) 43(10) 44(5) = 71 units
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                                 BOOTS (2)                                         │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+8. Timberland 6-Inch Premium - KSh 16,499
+   📦 Sizes: 39(8) 40(12) 41(15) 42(18) 43(10) 44(5) = 68 units
+
+13. Dr. Martens 1460 - KSh 15,999
+    📦 Sizes: 37(6) 38(10) 39(14) 40(16) 41(12) 42(8) 43(4) = 70 units
+
+
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│                               SANDALS (2)                                         │
+└───────────────────────────────────────────────────────────────────────────────────┘
+
+9. Birkenstock Arizona - KSh 8,999
+   📦 Sizes: 36(10) 37(14) 38(18) 39(15) 40(12) 41(8) = 77 units
+
+14. Crocs Classic Clog - KSh 4,999 🔥 BEST SELLER
+    📦 Sizes: 36(20) 37(25) 38(30) 39(28) 40(22) 41(18) 42(15) = 158 units
+
+
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                   ║
+║                              INVENTORY SUMMARY                                    ║
+║                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
+
+📊 CATEGORIES:
+   • Running:   6 products  (518 units)
+   • Casual:    4 products  (488 units)
+   • Sneakers:  3 products  (210 units)
+   • Outdoor:   3 products  (219 units)
+   • Boots:     2 products  (138 units)
+   • Sandals:   2 products  (235 units)
+
+💰 PRICE RANGES:
+   • Budget (Under KSh 8,000):     7 products
+   • Mid-Range (KSh 8,000-15,000): 9 products
+   • Premium (Over KSh 15,000):    4 products
+
+📈 STOCK LEVELS:
+   • High Stock (100+ units):      6 products
+   • Medium Stock (50-99 units):  13 products
+   • Low Stock (<50 units):        1 product ⚠️
+
+🎯 TOP 5 BY STOCK:
+   1. Crocs Classic Clog           - 158 units 🔥
+   2. Skechers Go Walk Max         - 140 units
+   3. Vans Old Skool               - 128 units
+   4. Converse Chuck Taylor        - 122 units
+   5. Fila Disruptor II            - 108 units
+
+⚠️ LOW STOCK ALERT:
+   • Jordan Retro 1 High OG        - Only 14 units left!
+
+🔢 SIZE POPULARITY:
+   Most Common Size Range: 38-43 (covers 90% of products)
+   Extended Sizes Available: 36-44 (select products)
+
+
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                   ║
+║                        HOW TO VIEW THIS DATA                                      ║
+║                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
+
+1. Open your browser
+2. Navigate to: admin/login.html
+3. Login with your admin credentials
+4. View the Products table
+
+You'll see all 20 products with:
+• Individual size-quantity breakdowns
+• Total stock calculations
+• Edit/Delete buttons for each product
+
+
+╔═══════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                   ║
+║  📄 Documentation: SIZE_QUANTITIES_GUIDE.md                                       ║
+║  🚀 Quick Start: QUICK_DEMO.md                                                    ║
+║  📊 Full Summary: DUMMY_DATA_SUMMARY.md                                           ║
+║                                                                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════════╝
+
+
+Legend:
+📦 = Available sizes with quantities in parentheses
+🔥 = Best selling / High stock product
+⚠️ = Limited edition / Low stock alert
+
+Last Updated: July 3, 2026
+Database: Supabase (products table)
+Total Products: 20
+Total Inventory: 1,808 units

@@ -98,20 +98,40 @@ document.querySelectorAll(".admin-sidebar a").forEach(link => {
 // ===== Render Products Table =====
 function renderTable() {
   const tbody = document.getElementById("products-tbody");
-  tbody.innerHTML = products.map(p => `
-    <tr>
-      <td>${p.id}</td>
-      <td>${p.name}</td>
-      <td>${p.category}</td>
-      <td>KSh ${parseFloat(p.price).toFixed(2)}</td>
-      <td>${p.size || 'N/A'}</td>
-      <td>${p.quantity !== undefined ? p.quantity : 'N/A'}</td>
-      <td>
-        <button class="btn-sm edit-btn" data-id="${p.id}">Edit</button>
-        <button class="btn-sm delete-btn danger" data-id="${p.id}">Delete</button>
-      </td>
-    </tr>
-  `).join("");
+  tbody.innerHTML = products.map(p => {
+    // Calculate total stock and format sizes
+    let sizeDisplay = 'N/A';
+    let totalStock = 0;
+    
+    if (p.size_quantities && typeof p.size_quantities === 'object') {
+      const sizeEntries = Object.entries(p.size_quantities);
+      if (sizeEntries.length > 0) {
+        sizeDisplay = sizeEntries
+          .map(([size, qty]) => `${size}: ${qty}`)
+          .join(', ');
+        totalStock = sizeEntries.reduce((sum, [_, qty]) => sum + parseInt(qty || 0), 0);
+      }
+    } else if (p.size || p.quantity !== undefined) {
+      // Fallback for old schema (migration compatibility)
+      sizeDisplay = `${p.size || 'N/A'}: ${p.quantity || 0}`;
+      totalStock = p.quantity || 0;
+    }
+    
+    return `
+      <tr>
+        <td>${p.id}</td>
+        <td>${p.name}</td>
+        <td>${p.category}</td>
+        <td>KSh ${parseFloat(p.price).toFixed(2)}</td>
+        <td style="font-size: 0.85rem;">${sizeDisplay}</td>
+        <td><strong>${totalStock}</strong></td>
+        <td>
+          <button class="btn-sm edit-btn" data-id="${p.id}">Edit</button>
+          <button class="btn-sm delete-btn danger" data-id="${p.id}">Delete</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
 }
 
 // ===== Delete =====
@@ -195,8 +215,17 @@ function openModal(product = null) {
   // Parse existing images if available
   const existingImages = product && product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [];
   
+  // Parse existing size-quantities
+  let existingSizes = [];
+  if (product && product.size_quantities && typeof product.size_quantities === 'object') {
+    existingSizes = Object.entries(product.size_quantities).map(([size, quantity]) => ({ size, quantity }));
+  } else if (product && product.size) {
+    // Fallback for old schema
+    existingSizes = [{ size: product.size.split(',')[0].trim(), quantity: product.quantity || 0 }];
+  }
+  
   modal.innerHTML = `
-    <div class="modal" style="max-width: 600px;">
+    <div class="modal" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
       <h3>${product ? "Edit Product" : "Add Product"}</h3>
       <label>Name<input id="m-name" type="text" value="${product ? product.name : ""}" /></label>
       <label>Category
@@ -207,8 +236,17 @@ function openModal(product = null) {
         </select>
       </label>
       <label>Price (KSh)<input id="m-price" type="number" step="0.01" value="${product ? product.price : ""}" /></label>
-      <label>Size (EU)<input id="m-size" type="text" placeholder="e.g., 39, 40, 41, 42, 43" value="${product ? (product.size || "") : ""}" /></label>
-      <label>Quantity<input id="m-quantity" type="number" min="0" value="${product ? (product.quantity || 0) : 0}" /></label>
+      
+      <!-- Size-Quantity Manager -->
+      <div style="margin: 1.5rem 0; padding: 1rem; background: var(--off-white); border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <label style="margin: 0; font-weight: 600;">Available Sizes & Quantities</label>
+          <button type="button" id="add-size-btn" class="btn-sm" style="background: var(--sage);">+ Add Size</button>
+        </div>
+        <div id="size-quantity-list" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          ${existingSizes.length > 0 ? existingSizes.map((item, idx) => createSizeRowHTML(item.size, item.quantity, idx)).join('') : '<p style="color: var(--text-light); font-size: 0.85rem;">No sizes added yet. Click "+ Add Size" to start.</p>'}
+        </div>
+      </div>
       
       <div style="margin: 1rem 0;">
         <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Product Images</label>
@@ -249,6 +287,50 @@ function openModal(product = null) {
   document.body.appendChild(modal);
 
   let uploadedImageUrls = [...existingImages];
+  let sizeRowCounter = existingSizes.length;
+
+  // Helper function to create a size row HTML
+  function createSizeRowHTML(size = '', quantity = 0, index = 0) {
+    const sizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+    return `
+      <div class="size-row" data-index="${index}" style="display: flex; gap: 0.75rem; align-items: center;">
+        <select class="size-select" style="flex: 1; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+          <option value="">Select Size (EU)</option>
+          ${sizes.map(s => `<option value="${s}" ${s === size ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <input type="number" class="qty-input" min="0" value="${quantity}" placeholder="Quantity" 
+               style="width: 120px; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;" />
+        <button type="button" class="remove-size-btn" style="padding: 0.5rem 0.75rem; background: #e94560; 
+                color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">✕</button>
+      </div>
+    `;
+  }
+
+  // Add size button handler
+  document.getElementById('add-size-btn').addEventListener('click', () => {
+    const list = document.getElementById('size-quantity-list');
+    
+    // Remove empty state message if it exists
+    const emptyMsg = list.querySelector('p');
+    if (emptyMsg) emptyMsg.remove();
+    
+    const newRow = document.createElement('div');
+    newRow.innerHTML = createSizeRowHTML('', 0, sizeRowCounter++);
+    list.appendChild(newRow.firstElementChild);
+  });
+
+  // Remove size button handler (delegated)
+  document.getElementById('size-quantity-list').addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-size-btn')) {
+      e.target.closest('.size-row').remove();
+      
+      // Show empty message if no rows left
+      const list = document.getElementById('size-quantity-list');
+      if (list.children.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-light); font-size: 0.85rem;">No sizes added yet. Click "+ Add Size" to start.</p>';
+      }
+    }
+  });
 
   // Remove image handler
   modal.addEventListener('click', (e) => {
@@ -328,17 +410,42 @@ function openModal(product = null) {
     const name     = document.getElementById("m-name").value.trim();
     const category = document.getElementById("m-category").value;
     const price    = parseFloat(document.getElementById("m-price").value);
-    const size     = document.getElementById("m-size").value.trim();
-    const quantity = parseInt(document.getElementById("m-quantity").value);
     const imagesUrls = document.getElementById("m-images-urls").value.trim();
 
     if (!name || isNaN(price)) {
-      alert("Please fill in all required fields.");
+      alert("Please fill in all required fields (Name and Price).");
       return;
     }
 
-    if (isNaN(quantity) || quantity < 0) {
-      alert("Please enter a valid quantity (0 or more).");
+    // Collect size-quantity data
+    const sizeQuantities = {};
+    const sizeRows = document.querySelectorAll('.size-row');
+    let hasValidSize = false;
+    let hasDuplicateSize = false;
+    const seenSizes = new Set();
+    
+    sizeRows.forEach(row => {
+      const size = row.querySelector('.size-select').value.trim();
+      const qty = parseInt(row.querySelector('.qty-input').value);
+      
+      if (size && !isNaN(qty) && qty >= 0) {
+        if (seenSizes.has(size)) {
+          hasDuplicateSize = true;
+        } else {
+          sizeQuantities[size] = qty;
+          seenSizes.add(size);
+          hasValidSize = true;
+        }
+      }
+    });
+
+    if (hasDuplicateSize) {
+      alert("Duplicate sizes detected. Please ensure each size is unique.");
+      return;
+    }
+
+    if (!hasValidSize) {
+      alert("Please add at least one valid size with quantity.");
       return;
     }
 
@@ -356,9 +463,8 @@ function openModal(product = null) {
         .update({ 
           name, 
           category, 
-          price, 
-          size: size || null,
-          quantity,
+          price,
+          size_quantities: sizeQuantities, // Store as JSONB
           image_url: primaryImageUrl,
           images: imagesUrls || null,
           updated_at: new Date().toISOString()
@@ -372,7 +478,14 @@ function openModal(product = null) {
         return;
       }
       
-      Object.assign(product, { name, category, price, size, quantity, image_url: primaryImageUrl, images: imagesUrls });
+      Object.assign(product, { 
+        name, 
+        category, 
+        price, 
+        size_quantities: sizeQuantities,
+        image_url: primaryImageUrl, 
+        images: imagesUrls 
+      });
     } else {
       // Insert new product
       const { data, error } = await supabase
@@ -380,9 +493,8 @@ function openModal(product = null) {
         .insert([{ 
           name, 
           category, 
-          price, 
-          size: size || null, 
-          quantity, 
+          price,
+          size_quantities: sizeQuantities, // Store as JSONB
           image_url: primaryImageUrl,
           images: imagesUrls || null
         }])

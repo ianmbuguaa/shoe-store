@@ -37,6 +37,7 @@ shoe-store/
 - **Product data is stored in Supabase** (`products` table). Admin changes sync to database and localStorage.
 - **Product images are stored in Supabase Storage** (`product-images` bucket). Legacy local `images/` folder maintained for backward compatibility.
 - **Admin authentication** uses Supabase Auth (email/password + magic link).
+- **Size-quantity management** uses JSONB column (`size_quantities`) to store multiple size-quantity pairs per product.
 - Placeholder images fall back to `https://placehold.co/400x200?text=Shoe` via `onerror` on `<img>` tags.
 - Nav links must always point to real files (`index.html`, `shop.html`, `cart.html`), not `#`.
 - The active nav link gets the class `active`.
