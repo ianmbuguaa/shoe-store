@@ -7,72 +7,34 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ===== Product Data =====
-const products = [
-  {
-    id: 1,
-    name: "Coastal Drift",
-    price: 89.99,
-    image: "images/shoe1.jpg",
-    category: "Beach"
-  },
-  {
-    id: 2,
-    name: "Tide Walker",
-    price: 74.99,
-    image: "images/shoe2.jpg",
-    category: "Beach"
-  },
-  {
-    id: 3,
-    name: "Palm Stride",
-    price: 99.99,
-    image: "images/shoe3.jpg",
-    category: "Casual"
-  },
-  {
-    id: 4,
-    name: "Dune Runner",
-    price: 119.99,
-    image: "images/shoe4.jpg",
-    category: "Trail"
-  }
-];
+// ===== Product Data (load from Supabase) =====
+let products = [];
+let bestSellers = [];
 
-const bestSellers = [
-  {
-    id: 5,
-    name: "Lagoon Sandal",
-    price: 64.99,
-    image: "images/shoe1.jpg",
-    category: "Beach",
-    badge: "🔥 Best Seller"
-  },
-  {
-    id: 6,
-    name: "Terra Wrap",
-    price: 79.99,
-    image: "images/shoe2.jpg",
-    category: "Trail",
-    badge: "⭐ Top Rated"
-  },
-  {
-    id: 7,
-    name: "Breeze Slip",
-    price: 54.99,
-    image: "images/shoe3.jpg",
-    category: "Casual",
-    badge: "💚 Eco Pick"
-  },
-  {
-    id: 8,
-    name: "Mangrove Mule",
-    price: 109.99,
-    image: "images/shoe4.jpg",
-    category: "Eco",
-    badge: "🌿 New"
+async function loadProducts() {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(8);
+  
+  if (error) {
+    console.error('Error loading products:', error);
+    return;
   }
-];
+  
+  console.log('Loaded products from database:', data);
+  
+  if (data && data.length > 0) {
+    // Use first 4 products as featured
+    products = data.slice(0, 4);
+    // Use next 4 (or remaining) as best sellers
+    bestSellers = data.slice(4, 8);
+  }
+  
+  renderProducts();
+  renderBestSellers();
+}
 
 // ===== Cart =====
 function getCart() {
@@ -107,8 +69,42 @@ function buildCard(product, badgeText = null) {
   const card = document.createElement("div");
   card.classList.add("card");
   
+  // Calculate total stock from size_quantities
+  let totalStock = 0;
+  let sizeQuantities = product.size_quantities;
+  
+  // Parse size_quantities if it's a string (shouldn't happen with Supabase JSONB, but just in case)
+  if (typeof sizeQuantities === 'string') {
+    try {
+      sizeQuantities = JSON.parse(sizeQuantities);
+    } catch (e) {
+      console.error('Error parsing size_quantities for', product.name, e);
+      sizeQuantities = null;
+    }
+  }
+  
+  // Calculate stock - ensure it's an object and not an array
+  if (sizeQuantities && typeof sizeQuantities === 'object' && !Array.isArray(sizeQuantities)) {
+    const quantities = Object.values(sizeQuantities);
+    if (quantities.length > 0) {
+      totalStock = quantities.reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+    }
+  } else if (product.quantity !== undefined) {
+    // Fallback for old schema
+    totalStock = product.quantity || 0;
+  }
+  
+  console.log(`Product: ${product.name}, size_quantities:`, sizeQuantities, `totalStock: ${totalStock}`);
+  
+  const isOutOfStock = totalStock <= 0;
+  
+  // Add out-of-stock class if needed
+  if (isOutOfStock) {
+    card.classList.add("out-of-stock");
+  }
+  
   // Parse multiple images if available (comma-separated URLs)
-  const imageUrl = product.image || 'https://placehold.co/400x210?text=Sandal';
+  const imageUrl = product.image_url || product.image || 'https://placehold.co/400x210?text=Sandal';
   const images = product.images ? product.images.split(',').map(img => img.trim()).filter(img => img) : [imageUrl];
   
   // If only one image URL is stored, use it for all slides
@@ -154,8 +150,15 @@ function buildCard(product, badgeText = null) {
     <div class="card-body">
       <span class="category-tag">${product.category}</span>
       <h3>${product.name}</h3>
-      <span class="price">KSh ${product.price.toFixed(2)}</span>
-      <button class="add-to-cart" data-id="${product.id}">Add to Cart</button>
+      <span class="price">KSh ${parseFloat(product.price).toFixed(2)}</span>
+      ${isOutOfStock 
+        ? '<button class="add-to-cart" disabled style="background: #999; cursor: not-allowed;">Out of Stock</button>'
+        : `<button class="add-to-cart" data-id="${product.id}">Add to Cart</button>`
+      }
+      ${totalStock > 0 && totalStock <= 10 
+        ? `<p style="font-size: 0.8rem; color: #e94560; margin-top: 0.5rem;">Only ${totalStock} left!</p>`
+        : ''
+      }
     </div>
   `;
   
@@ -222,6 +225,7 @@ function setupImageSlideshow(card, imageCount) {
 function renderProducts() {
   const grid = document.getElementById("product-grid");
   if (!grid) return;
+  grid.innerHTML = ''; // Clear existing content
   products.forEach(p => grid.appendChild(buildCard(p)));
 }
 
@@ -229,7 +233,12 @@ function renderProducts() {
 function renderBestSellers() {
   const grid = document.getElementById("best-sellers-grid");
   if (!grid) return;
-  bestSellers.forEach(p => grid.appendChild(buildCard(p, p.badge)));
+  grid.innerHTML = ''; // Clear existing content
+  const badges = ["🔥 Best Seller", "⭐ Top Rated", "💚 Eco Pick", "🌿 New"];
+  bestSellers.forEach((p, index) => {
+    const badge = badges[index % badges.length];
+    grid.appendChild(buildCard(p, badge));
+  });
 }
 
 // ===== Quantity Modal =====
@@ -237,12 +246,34 @@ function openQuantityModal(product, availableQty) {
   const existing = document.getElementById("quantity-modal");
   if (existing) existing.remove();
 
-  // Parse available sizes from product.size field, or use default European sizes
-  let availableSizes = product.size ? product.size.split(',').map(s => s.trim()).filter(s => s) : [];
+  // Parse available sizes from size_quantities (JSONB) or fall back to size field
+  let availableSizes = [];
+  let sizeStock = {};
+  
+  if (product.size_quantities && typeof product.size_quantities === 'object') {
+    // Use size_quantities JSONB data
+    availableSizes = Object.keys(product.size_quantities).filter(size => {
+      const qty = parseInt(product.size_quantities[size] || 0);
+      if (qty > 0) {
+        sizeStock[size] = qty;
+        return true;
+      }
+      return false;
+    }).sort((a, b) => parseInt(a) - parseInt(b));
+  } else if (product.size) {
+    // Fallback to old size field
+    availableSizes = product.size.split(',').map(s => s.trim()).filter(s => s);
+    availableSizes.forEach(size => {
+      sizeStock[size] = availableQty; // Assume all sizes have same stock
+    });
+  }
   
   // If no sizes defined, use common European sizes
   if (availableSizes.length === 0) {
     availableSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+    availableSizes.forEach(size => {
+      sizeStock[size] = availableQty;
+    });
   }
 
   const modal = document.createElement("div");
@@ -264,11 +295,12 @@ function openQuantityModal(product, availableQty) {
         </label>
         <div id="size-selector" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 380px; margin: 0 auto;">
           ${availableSizes.map(size => `
-            <button type="button" class="size-option" data-size="${size}" 
+            <button type="button" class="size-option" data-size="${size}" data-stock="${sizeStock[size]}"
                     style="padding: 0.6rem 1rem; border: 2px solid var(--border); background: white; 
                            color: var(--text-dark); border-radius: 6px; cursor: pointer; font-weight: 600; 
-                           font-size: 0.9rem; transition: all 0.2s; min-width: 55px;">
+                           font-size: 0.9rem; transition: all 0.2s; min-width: 55px; position: relative;">
               ${size}
+              ${sizeStock[size] <= 5 ? `<span style="position: absolute; top: -5px; right: -5px; background: #e94560; color: white; font-size: 0.65rem; padding: 2px 4px; border-radius: 3px;">${sizeStock[size]}</span>` : ''}
             </button>
           `).join('')}
         </div>
@@ -284,7 +316,7 @@ function openQuantityModal(product, availableQty) {
           <span id="qty-display" style="font-size: 1.8rem; font-weight: 600; min-width: 50px; color: var(--text-dark);">1</span>
           <button type="button" class="qty-modal-btn" id="qty-increase" style="font-size: 1.5rem; width: 40px; height: 40px; border: 2px solid var(--sage); background: white; color: var(--sage); border-radius: 50%; cursor: pointer; font-weight: bold;">+</button>
         </div>
-        ${availableQty <= 10 ? `<p style="font-size: 0.85rem; color: #e94560; margin-top: 0.75rem;">Only ${availableQty} available</p>` : ''}
+        <p id="stock-message" style="font-size: 0.85rem; color: var(--text-mid); margin-top: 0.75rem; min-height: 1.2rem;">Please select a size</p>
       </div>
       
       <div style="margin: 1.5rem 0; padding: 1rem; background: var(--sage-light); border-radius: 8px;">
@@ -304,8 +336,8 @@ function openQuantityModal(product, availableQty) {
 
   let currentQty = 1;
   let selectedSize = null;
-  const maxQty = availableQty;
-  const pricePerUnit = product.price;
+  let maxQty = 1;
+  const pricePerUnit = parseFloat(product.price);
 
   // Size selection handler
   const sizeButtons = document.querySelectorAll('.size-option');
@@ -322,7 +354,23 @@ function openQuantityModal(product, availableQty) {
       btn.style.background = 'var(--sage)';
       btn.style.color = 'white';
       selectedSize = btn.dataset.size;
+      maxQty = parseInt(btn.dataset.stock) || 1;
+      currentQty = 1; // Reset quantity when size changes
       document.getElementById('size-error').textContent = '';
+      
+      // Update stock message
+      const stockMsg = document.getElementById('stock-message');
+      if (stockMsg) {
+        if (maxQty <= 5) {
+          stockMsg.textContent = `Only ${maxQty} available in this size`;
+          stockMsg.style.color = '#e94560';
+        } else {
+          stockMsg.textContent = `${maxQty} available in this size`;
+          stockMsg.style.color = 'var(--text-mid)';
+        }
+      }
+      
+      updateDisplay();
     });
   });
 
@@ -330,7 +378,7 @@ function openQuantityModal(product, availableQty) {
     document.getElementById("qty-display").textContent = currentQty;
     document.getElementById("total-price").textContent = `KSh ${(pricePerUnit * currentQty).toFixed(2)}`;
     document.getElementById("qty-decrease").disabled = currentQty <= 1;
-    document.getElementById("qty-increase").disabled = currentQty >= maxQty;
+    document.getElementById("qty-increase").disabled = currentQty >= maxQty || !selectedSize;
   }
 
   document.getElementById("qty-decrease").addEventListener("click", () => {
@@ -341,7 +389,7 @@ function openQuantityModal(product, availableQty) {
   });
 
   document.getElementById("qty-increase").addEventListener("click", () => {
-    if (currentQty < maxQty) {
+    if (currentQty < maxQty && selectedSize) {
       currentQty++;
       updateDisplay();
     }
@@ -400,12 +448,17 @@ document.addEventListener("click", async function (e) {
   try {
     const { data: inventoryData, error } = await supabase
       .from('products')
-      .select('quantity')
+      .select('size_quantities')
       .eq('id', id)
       .single();
     
     if (!error && inventoryData) {
-      const availableQty = inventoryData.quantity || 0;
+      // Calculate total available quantity from size_quantities
+      let availableQty = 0;
+      if (inventoryData.size_quantities && typeof inventoryData.size_quantities === 'object') {
+        availableQty = Object.values(inventoryData.size_quantities).reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+      }
+      
       const cart = getCart();
       const cartItem = cart.find(i => i.id === id);
       const currentCartQty = cartItem ? (cartItem.quantity || 1) : 0;
@@ -431,5 +484,4 @@ document.addEventListener("click", async function (e) {
 
 // ===== Init =====
 updateCartCount();
-renderProducts();
-renderBestSellers();
+loadProducts();

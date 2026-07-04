@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In / Sign Up – StepUp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 3rem auto;
+      padding: 2rem 5%;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .auth-tab {
+      padding: 1rem 2rem;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-mid);
+      transition: all 0.3s;
+      margin-bottom: -2px;
+    }
+    
+    .auth-tab.active {
+      color: var(--sage);
+      border-bottom-color: var(--sage);
+    }
+    
+    .auth-form {
+      display: none;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+    
+    .auth-form.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--sage);
+    }
+    
+    .message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    
+    #error-message {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    #success-message {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="announcement-bar">
+    <p>✨ Free delivery on orders over KSh 5,000</p>
+  </header>
+
+  <nav>
+    <div class="logo">👟 StepUp</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="auth.html" class="active">Login</a>
+      <a href="cart.html" class="cart-icon">🛒 <span id="cart-count">0</span></a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="auth-container">
+    <div style="text-align: center; margin-bottom: 2rem;">
+      <h1 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome to StepUp</h1>
+      <p style="color: var(--text-mid);">Sign in to your account or create a new one</p>
+    </div>
+
+    <div id="error-message" class="message"></div>
+    <div id="success-message" class="message"></div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-tab="login">Sign In</button>
+      <button class="auth-tab" data-tab="signup">Sign Up</button>
+    </div>
+
+    <!-- Sign In Form -->
+    <form id="login-form" class="auth-form active">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" required placeholder="you@example.com" />
+      </div>
+      
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required placeholder="Enter your password" />
+      </div>
+      
+      <button type="submit" class="btn" id="login-btn" style="width: 100%; margin-bottom: 1rem;">Sign In</button>
+      
+      <p style="text-align: center; font-size: 0.9rem; color: var(--text-mid);">
+        Don't have an account? <a href="#" class="switch-tab" data-tab="signup" style="color: var(--sage); font-weight: 600;">Sign up</a>
+      </p>
+    </form>
+
+    <!-- Sign Up Form -->
+    <form id="signup-form" class="auth-form">
+      <div class="form-group">
+        <label for="signup-name">Full Name</label>
+        <input type="text" id="signup-name" required placeholder="John Doe" />
+      </div>
+      
+      <div class="form-group">
+        <label for="signup-email">Email Address</label>
+        <input type="email" id="signup-email" required placeholder="you@example.com" />
+      </div>
+      
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" required placeholder="At least 6 characters" minlength="6" />
+      </div>
+      
+      <button type="submit" class="btn" id="signup-btn" style="width: 100%; margin-bottom: 1rem;">Create Account</button>
+      
+      <p style="text-align: center; font-size: 0.9rem; color: var(--text-mid);">
+        Already have an account? <a href="#" class="switch-tab" data-tab="login" style="color: var(--sage); font-weight: 600;">Sign in</a>
+      </p>
+    </form>
+
+    <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <p style="font-size: 0.85rem; color: var(--text-light);">
+        By continuing, you agree to our Terms of Service and Privacy Policy
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h3>StepUp</h3>
+        <p>Premium footwear for every step of your journey.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:2rem; color:var(--text-light);">&copy; 2025 StepUp. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Update cart count
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const total = cart.reduce((sum, i) => sum + i.qty, 0);
+      document.getElementById("cart-count").textContent = total;
+    }
+    updateCartCount();
+
+    // Tab switching
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const targetTab = tab.dataset.tab;
+        
+        // Update active tab
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // Show corresponding form
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+        document.getElementById(`${targetTab}-form`).classList.add('active');
+      });
+    });
+
+    // Switch tab links
+    document.querySelectorAll('.switch-tab').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetTab = link.dataset.tab;
+        document.querySelector(`.auth-tab[data-tab="${targetTab}"]`).click();
+      });
+    });
+  </script>
+  
+  <script type="module" src="js/customer-auth.js"></script>
+</body>
+</html>

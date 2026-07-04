@@ -73,6 +73,15 @@ function renderCart() {
 
 // ===== Checkout Handler =====
 async function handleCheckout() {
+  // Check if user is authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    // Not logged in - redirect to auth page with return URL
+    window.location.href = 'auth.html?returnTo=checkout.html';
+    return;
+  }
+  
   const cart = getCart();
   
   if (cart.length === 0) {
@@ -80,66 +89,8 @@ async function handleCheckout() {
     return;
   }
 
-  const checkoutBtn = document.getElementById("checkout-btn");
-  checkoutBtn.disabled = true;
-  checkoutBtn.textContent = "Processing...";
-
-  try {
-    // Validate and update inventory for each item
-    for (const item of cart) {
-      // Fetch current product quantity from database
-      const { data: product, error: fetchError } = await supabase
-        .from('products')
-        .select('quantity')
-        .eq('id', item.id)
-        .single();
-
-      if (fetchError) {
-        throw new Error(`Error fetching product ${item.name}: ${fetchError.message}`);
-      }
-
-      // Check if sufficient quantity available
-      const currentQuantity = product.quantity || 0;
-      if (currentQuantity < item.qty) {
-        throw new Error(`Insufficient stock for ${item.name}. Only ${currentQuantity} available.`);
-      }
-
-      // Deduct quantity from inventory
-      const newQuantity = currentQuantity - item.qty;
-      const { error: updateError } = await supabase
-        .from('products')
-        .update({ 
-          quantity: newQuantity,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', item.id);
-
-      if (updateError) {
-        throw new Error(`Error updating inventory for ${item.name}: ${updateError.message}`);
-      }
-    }
-
-    // Success! Clear cart and show confirmation
-    localStorage.removeItem("cart");
-    updateCartCount();
-    
-    // Show success message
-    const container = document.getElementById("cart-items");
-    container.innerHTML = `
-      <div class="empty-cart" style="text-align: center; padding: 3rem 1rem;">
-        <h2 style="color: var(--sage); margin-bottom: 1rem;">✓ Order Placed Successfully!</h2>
-        <p style="color: var(--text-mid); margin-bottom: 2rem;">Thank you for your order. Your items will be shipped soon.</p>
-        <a href="shop.html" class="btn">Continue Shopping</a>
-      </div>`;
-    
-    document.getElementById("cart-summary").innerHTML = "";
-
-  } catch (error) {
-    console.error("Checkout error:", error);
-    alert(error.message || "Checkout failed. Please try again.");
-    checkoutBtn.disabled = false;
-    checkoutBtn.textContent = "Proceed to Checkout";
-  }
+  // User is authenticated, proceed to checkout page
+  window.location.href = 'checkout.html';
 }
 
 // ===== Event Delegation =====

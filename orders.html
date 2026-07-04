@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders – StepUp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="announcement-bar">
+    <p>✨ Free delivery on orders over KSh 5,000</p>
+  </header>
+
+  <nav>
+    <div class="logo">👟 StepUp</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="orders.html" class="active">My Orders</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="auth.html" id="auth-link">Login</a>
+      <a href="cart.html" class="cart-icon">🛒 <span id="cart-count">0</span></a>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main style="padding: 3rem 5%; max-width: 1200px; margin: 0 auto;">
+    <div class="page-header">
+      <h1>My Orders</h1>
+      <p>Track and manage your shoe orders</p>
+    </div>
+
+    <div id="orders-container" style="margin-top: 2rem;">
+      <div id="loading" style="text-align: center; padding: 3rem; color: var(--text-mid);">
+        <p>Loading your orders...</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h3>StepUp</h3>
+        <p>Premium footwear for every step of your journey.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Follow Us</h4>
+        <ul>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+    <p style="text-align:center; margin-top:2rem; color:var(--text-light);">&copy; 2025 StepUp. All rights reserved.</p>
+  </footer>
+
+  <script type="module" src="js/orders.js"></script>
+</body>
+</html>

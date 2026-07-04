@@ -40,7 +40,7 @@ async function addToCart(id) {
   // Check current inventory before adding
   const { data: product, error } = await supabase
     .from('products')
-    .select('quantity')
+    .select('size_quantities')
     .eq('id', id)
     .single();
   
@@ -49,7 +49,12 @@ async function addToCart(id) {
     return false;
   }
   
-  const availableQty = product.quantity || 0;
+  // Calculate total available quantity from size_quantities
+  let availableQty = 0;
+  if (product.size_quantities && typeof product.size_quantities === 'object') {
+    availableQty = Object.values(product.size_quantities).reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+  }
+  
   const cart = getCart();
   const cartItem = cart.find(i => i.id === id);
   const currentCartQty = cartItem ? cartItem.qty : 0;
@@ -90,8 +95,16 @@ function renderProducts(list) {
     const card = document.createElement("div");
     card.classList.add("card");
     
-    const quantity = product.quantity || 0;
-    const isOutOfStock = quantity <= 0;
+    // Calculate total stock from size_quantities
+    let totalStock = 0;
+    if (product.size_quantities && typeof product.size_quantities === 'object') {
+      totalStock = Object.values(product.size_quantities).reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+    } else if (product.quantity !== undefined) {
+      // Fallback for old schema
+      totalStock = product.quantity || 0;
+    }
+    
+    const isOutOfStock = totalStock <= 0;
     
     // Add out-of-stock class if needed
     if (isOutOfStock) {
@@ -130,8 +143,8 @@ function renderProducts(list) {
           ? '<button class="add-to-cart" disabled style="background: #999; cursor: not-allowed;">Out of Stock</button>'
           : `<button class="add-to-cart" data-id="${product.id}">Add to Cart</button>`
         }
-        ${quantity > 0 && quantity <= 10 
-          ? `<p style="font-size: 0.8rem; color: #e94560; margin-top: 0.5rem;">Only ${quantity} left!</p>`
+        ${totalStock > 0 && totalStock <= 10 
+          ? `<p style="font-size: 0.8rem; color: #e94560; margin-top: 0.5rem;">Only ${totalStock} left!</p>`
           : ''
         }
       </div>
@@ -215,12 +228,34 @@ function openQuantityModal(product, availableQty) {
   const existing = document.getElementById("quantity-modal");
   if (existing) existing.remove();
 
-  // Parse available sizes from product.size field, or use default European sizes
-  let availableSizes = product.size ? product.size.split(',').map(s => s.trim()).filter(s => s) : [];
+  // Parse available sizes from size_quantities (JSONB) or fall back to size field
+  let availableSizes = [];
+  let sizeStock = {};
+  
+  if (product.size_quantities && typeof product.size_quantities === 'object') {
+    // Use size_quantities JSONB data
+    availableSizes = Object.keys(product.size_quantities).filter(size => {
+      const qty = parseInt(product.size_quantities[size] || 0);
+      if (qty > 0) {
+        sizeStock[size] = qty;
+        return true;
+      }
+      return false;
+    }).sort((a, b) => parseInt(a) - parseInt(b));
+  } else if (product.size) {
+    // Fallback to old size field
+    availableSizes = product.size.split(',').map(s => s.trim()).filter(s => s);
+    availableSizes.forEach(size => {
+      sizeStock[size] = availableQty; // Assume all sizes have same stock
+    });
+  }
   
   // If no sizes defined, use common European sizes
   if (availableSizes.length === 0) {
     availableSizes = ['36', '37', '38', '39', '40', '41', '42', '43', '44', '45'];
+    availableSizes.forEach(size => {
+      sizeStock[size] = availableQty;
+    });
   }
 
   const modal = document.createElement("div");
@@ -242,11 +277,12 @@ function openQuantityModal(product, availableQty) {
         </label>
         <div id="size-selector" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 380px; margin: 0 auto;">
           ${availableSizes.map(size => `
-            <button type="button" class="size-option" data-size="${size}" 
+            <button type="button" class="size-option" data-size="${size}" data-stock="${sizeStock[size]}"
                     style="padding: 0.6rem 1rem; border: 2px solid var(--border); background: white; 
                            color: var(--text-dark); border-radius: 6px; cursor: pointer; font-weight: 600; 
-                           font-size: 0.9rem; transition: all 0.2s; min-width: 55px;">
+                           font-size: 0.9rem; transition: all 0.2s; min-width: 55px; position: relative;">
               ${size}
+              ${sizeStock[size] <= 5 ? `<span style="position: absolute; top: -5px; right: -5px; background: #e94560; color: white; font-size: 0.65rem; padding: 2px 4px; border-radius: 3px;">${sizeStock[size]}</span>` : ''}
             </button>
           `).join('')}
         </div>
@@ -262,7 +298,7 @@ function openQuantityModal(product, availableQty) {
           <span id="qty-display" style="font-size: 1.8rem; font-weight: 600; min-width: 50px; color: var(--text-dark);">1</span>
           <button type="button" class="qty-modal-btn" id="qty-increase" style="font-size: 1.5rem; width: 40px; height: 40px; border: 2px solid var(--sage); background: white; color: var(--sage); border-radius: 50%; cursor: pointer; font-weight: bold;">+</button>
         </div>
-        ${availableQty <= 10 ? `<p style="font-size: 0.85rem; color: #e94560; margin-top: 0.75rem;">Only ${availableQty} available</p>` : ''}
+        <p id="stock-message" style="font-size: 0.85rem; color: var(--text-mid); margin-top: 0.75rem; min-height: 1.2rem;">Please select a size</p>
       </div>
       
       <div style="margin: 1.5rem 0; padding: 1rem; background: var(--sage-light); border-radius: 8px;">
@@ -282,7 +318,7 @@ function openQuantityModal(product, availableQty) {
 
   let currentQty = 1;
   let selectedSize = null;
-  const maxQty = availableQty;
+  let maxQty = 1;
   const pricePerUnit = parseFloat(product.price);
 
   // Size selection handler
@@ -300,7 +336,21 @@ function openQuantityModal(product, availableQty) {
       btn.style.background = 'var(--sage)';
       btn.style.color = 'white';
       selectedSize = btn.dataset.size;
+      maxQty = parseInt(btn.dataset.stock) || 1;
+      currentQty = 1; // Reset quantity when size changes
       document.getElementById('size-error').textContent = '';
+      
+      // Update stock message
+      const stockMsg = document.getElementById('stock-message');
+      if (maxQty <= 5) {
+        stockMsg.textContent = `Only ${maxQty} available in this size`;
+        stockMsg.style.color = '#e94560';
+      } else {
+        stockMsg.textContent = `${maxQty} available in this size`;
+        stockMsg.style.color = 'var(--text-mid)';
+      }
+      
+      updateDisplay();
     });
   });
 
@@ -308,7 +358,7 @@ function openQuantityModal(product, availableQty) {
     document.getElementById("qty-display").textContent = currentQty;
     document.getElementById("total-price").textContent = `KSh ${(pricePerUnit * currentQty).toFixed(2)}`;
     document.getElementById("qty-decrease").disabled = currentQty <= 1;
-    document.getElementById("qty-increase").disabled = currentQty >= maxQty;
+    document.getElementById("qty-increase").disabled = currentQty >= maxQty || !selectedSize;
   }
 
   document.getElementById("qty-decrease").addEventListener("click", () => {
@@ -319,7 +369,7 @@ function openQuantityModal(product, availableQty) {
   });
 
   document.getElementById("qty-increase").addEventListener("click", () => {
-    if (currentQty < maxQty) {
+    if (currentQty < maxQty && selectedSize) {
       currentQty++;
       updateDisplay();
     }
@@ -366,7 +416,7 @@ async function addToCartWithQuantity(id, quantity, size = null) {
   // Check current inventory before adding
   const { data: product, error } = await supabase
     .from('products')
-    .select('quantity')
+    .select('size_quantities')
     .eq('id', id)
     .single();
   
@@ -375,7 +425,12 @@ async function addToCartWithQuantity(id, quantity, size = null) {
     return false;
   }
   
-  const availableQty = product.quantity || 0;
+  // Calculate total available quantity from size_quantities
+  let availableQty = 0;
+  if (product.size_quantities && typeof product.size_quantities === 'object') {
+    availableQty = Object.values(product.size_quantities).reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+  }
+  
   const cart = getCart();
   
   // Find cart item with matching id AND size
@@ -407,23 +462,18 @@ document.getElementById("product-grid").addEventListener("click", async function
     
     if (!product) return;
     
-    // Fetch current inventory
-    const { data: inventoryData, error } = await supabase
-      .from('products')
-      .select('quantity')
-      .eq('id', id)
-      .single();
-    
-    if (error) {
-      alert('Error loading product details. Please try again.');
-      return;
+    // Calculate total available stock from size_quantities
+    let totalStock = 0;
+    if (product.size_quantities && typeof product.size_quantities === 'object') {
+      totalStock = Object.values(product.size_quantities).reduce((sum, qty) => sum + parseInt(qty || 0), 0);
+    } else if (product.quantity !== undefined) {
+      totalStock = product.quantity || 0;
     }
     
-    const availableQty = inventoryData.quantity || 0;
     const cart = getCart();
     const cartItem = cart.find(i => i.id === id);
     const currentCartQty = cartItem ? cartItem.qty : 0;
-    const remainingQty = availableQty - currentCartQty;
+    const remainingQty = totalStock - currentCartQty;
     
     if (remainingQty <= 0) {
       alert('Sorry, this item is out of stock or you have reached the maximum available quantity.');

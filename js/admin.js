@@ -11,15 +11,65 @@ let currentUser = null;
 
 // ===== Authentication Check =====
 async function checkAuth() {
+  console.log('Starting auth check...');
   const { data: { session } } = await supabase.auth.getSession();
   
   if (!session) {
+    console.log('No session found - redirecting to login');
     // No valid session - redirect to login
     window.location.href = 'login.html';
     return;
   }
   
   currentUser = session.user;
+  console.log('Current user:', currentUser.email, 'ID:', currentUser.id);
+  
+  // Check if user has admin role
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+  
+  console.log('Profile query result:', { profile, error });
+  
+  if (error) {
+    console.error('Error fetching profile:', error);
+    
+    // Profile doesn't exist yet - create it with admin role for this user
+    if (error.code === 'PGRST116') {
+      console.log('Profile not found, creating admin profile...');
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([{ id: currentUser.id, role: 'admin', full_name: 'Admin User' }])
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error creating profile:', insertError);
+        await supabase.auth.signOut();
+        alert('Error creating admin profile. Please contact support.');
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      console.log('Admin profile created:', newProfile);
+    } else {
+      await supabase.auth.signOut();
+      alert('Access denied. Admin privileges required.');
+      window.location.href = 'login.html';
+      return;
+    }
+  } else if (!profile || profile.role !== 'admin') {
+    console.log('User is not an admin. Role:', profile?.role);
+    // User is not an admin - sign out and redirect
+    await supabase.auth.signOut();
+    alert('Access denied. Admin privileges required.');
+    window.location.href = 'login.html';
+    return;
+  }
+  
+  console.log('Auth check passed! User is admin.');
   document.getElementById('admin-email').textContent = currentUser.email;
   
   // Set up logout button handler
@@ -60,6 +110,7 @@ async function checkAuth() {
 
 // ===== Product Data (load from Supabase) =====
 let products = [];
+let orders = [];
 
 async function loadProducts() {
   const { data, error } = await supabase
@@ -76,6 +127,22 @@ async function loadProducts() {
   }
   
   renderTable();
+}
+
+async function loadOrders() {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error loading orders:', error);
+    orders = [];
+  } else {
+    orders = data || [];
+  }
+  
+  renderOrdersTable();
 }
 
 async function saveProducts() {
@@ -132,6 +199,202 @@ function renderTable() {
       </tr>
     `;
   }).join("");
+}
+
+// ===== Render Orders Table =====
+function renderOrdersTable() {
+  const ordersPanel = document.getElementById('orders');
+  
+  if (orders.length === 0) {
+    ordersPanel.innerHTML = `
+      <div class="panel-header">
+        <h2>Orders</h2>
+      </div>
+      <p class="empty-state">No orders yet.</p>
+    `;
+    return;
+  }
+  
+  ordersPanel.innerHTML = `
+    <div class="panel-header">
+      <h2>Orders (${orders.length})</h2>
+    </div>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order ID</th>
+          <th>Customer</th>
+          <th>Email</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${orders.map(order => {
+          const itemCount = Array.isArray(order.items) ? order.items.length : 0;
+          const orderDate = new Date(order.created_at).toLocaleDateString();
+          const statusColors = {
+            pending: 'background: #ffc107; color: #000',
+            processing: 'background: #2196F3; color: #fff',
+            completed: 'background: #4CAF50; color: #fff',
+            cancelled: 'background: #f44336; color: #fff'
+          };
+          
+          return `
+            <tr>
+              <td><strong>#${order.id.substring(0, 8)}</strong></td>
+              <td>${order.customer_name}</td>
+              <td style="font-size: 0.85rem;">${order.customer_email}</td>
+              <td>${itemCount} item${itemCount !== 1 ? 's' : ''}</td>
+              <td><strong>KSh ${parseFloat(order.total_amount).toFixed(2)}</strong></td>
+              <td>
+                <span style="padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; ${statusColors[order.status] || ''}">
+                  ${order.status}
+                </span>
+              </td>
+              <td style="font-size: 0.85rem;">${orderDate}</td>
+              <td>
+                <button class="btn-sm view-order-btn" data-order-id="${order.id}">View</button>
+              </td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+  
+  // Add event listeners for view buttons
+  document.querySelectorAll('.view-order-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const orderId = e.target.dataset.orderId;
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        showOrderDetailsModal(order);
+      }
+    });
+  });
+}
+
+// ===== Show Order Details Modal =====
+function showOrderDetailsModal(order) {
+  const modal = document.createElement("div");
+  modal.id = "order-details-modal";
+  modal.classList.add("modal-overlay");
+  
+  const items = Array.isArray(order.items) ? order.items : [];
+  
+  modal.innerHTML = `
+    <div class="modal" style="max-width: 700px;">
+      <h3>Order Details - #${order.id.substring(0, 8)}</h3>
+      
+      <div style="background: var(--off-white); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin: 0;">Customer</p>
+            <p style="font-weight: 600; margin: 0.25rem 0 0 0;">${order.customer_name}</p>
+          </div>
+          <div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin: 0;">Email</p>
+            <p style="font-weight: 600; margin: 0.25rem 0 0 0;">${order.customer_email}</p>
+          </div>
+          <div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin: 0;">Phone</p>
+            <p style="font-weight: 600; margin: 0.25rem 0 0 0;">${order.customer_phone || 'N/A'}</p>
+          </div>
+          <div>
+            <p style="font-size: 0.85rem; color: var(--text-light); margin: 0;">Order Date</p>
+            <p style="font-weight: 600; margin: 0.25rem 0 0 0;">${new Date(order.created_at).toLocaleString()}</p>
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <p style="font-size: 0.85rem; color: var(--text-light); margin: 0;">Shipping Address</p>
+          <p style="font-weight: 600; margin: 0.25rem 0 0 0;">${order.customer_address || 'N/A'}, ${order.customer_city || ''} ${order.customer_postal_code || ''}</p>
+        </div>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <h4 style="margin-bottom: 0.75rem;">Order Items</h4>
+        <table class="admin-table" style="font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Size</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.selectedSize || 'N/A'}</td>
+                <td>${item.qty}</td>
+                <td>KSh ${parseFloat(item.price).toFixed(2)}</td>
+                <td><strong>KSh ${(parseFloat(item.price) * item.qty).toFixed(2)}</strong></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--sage-light); border-radius: 8px; margin-bottom: 1.5rem;">
+        <span style="font-size: 1.1rem; font-weight: 600;">Total Amount:</span>
+        <span style="font-size: 1.3rem; font-weight: 700; color: var(--sage);">KSh ${parseFloat(order.total_amount).toFixed(2)}</span>
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Update Order Status</label>
+        <select id="order-status-select" style="width: 100%; padding: 0.5rem; border: 1px solid var(--border); border-radius: 4px;">
+          <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+          <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+          <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn" id="update-order-btn">Update Status</button>
+        <button class="btn-sm" id="close-order-modal">Close</button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  document.getElementById('close-order-modal').addEventListener('click', () => modal.remove());
+  
+  document.getElementById('update-order-btn').addEventListener('click', async () => {
+    const newStatus = document.getElementById('order-status-select').value;
+    const updateBtn = document.getElementById('update-order-btn');
+    
+    updateBtn.disabled = true;
+    updateBtn.textContent = 'Updating...';
+    
+    const { error } = await supabase
+      .from('orders')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', order.id);
+    
+    if (error) {
+      alert('Error updating order: ' + error.message);
+      updateBtn.disabled = false;
+      updateBtn.textContent = 'Update Status';
+      return;
+    }
+    
+    // Update local orders array
+    const orderIndex = orders.findIndex(o => o.id === order.id);
+    if (orderIndex !== -1) {
+      orders[orderIndex].status = newStatus;
+    }
+    
+    renderOrdersTable();
+    modal.remove();
+  });
 }
 
 // ===== Delete =====
@@ -521,4 +784,5 @@ document.getElementById("add-product-btn").addEventListener("click", () => openM
 // ===== Init =====
 checkAuth().then(() => {
   loadProducts();
+  loadOrders();
 });

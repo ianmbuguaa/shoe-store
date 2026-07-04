@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout – Kodwaina</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <header>
+    <nav>
+      <div class="logo"><a href="index.html" style="color:inherit;">Kodwaina</a></div>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="cart-icon"><a href="cart.html" style="color:inherit;">🛒 <span id="cart-count">0</span></a></div>
+    </nav>
+  </header>
+
+  <main style="padding: 2rem 1rem; max-width: 1200px; margin: 0 auto;">
+    <section class="page-header">
+      <h1>Checkout</h1>
+      <p>Complete your order</p>
+    </section>
+
+    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 2rem; margin-top: 2rem;">
+      
+      <!-- Shipping Form -->
+      <div style="background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <h2 style="margin-bottom: 1.5rem; color: var(--text-dark);">Shipping Information</h2>
+        
+        <form id="checkout-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Full Name *</label>
+              <input type="text" id="full-name" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Email *</label>
+              <input type="email" id="email" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" />
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Phone Number *</label>
+            <input type="tel" id="phone" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" placeholder="+254 700 000 000" />
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Address *</label>
+            <input type="text" id="address" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" placeholder="Street address" />
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">City *</label>
+              <input type="text" id="city" required style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" />
+            </div>
+            <div>
+              <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Postal Code</label>
+              <input type="text" id="postal-code" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;" />
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Payment Method</label>
+            <select id="payment-method" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border); border-radius: 6px;">
+              <option value="mpesa">M-Pesa</option>
+              <option value="card">Credit/Debit Card</option>
+              <option value="cash">Cash on Delivery</option>
+            </select>
+          </div>
+          
+          <button type="submit" id="place-order-btn" class="btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">
+            Place Order
+          </button>
+        </form>
+      </div>
+      
+      <!-- Order Summary -->
+      <div style="background: var(--sage-light); padding: 2rem; border-radius: 12px; height: fit-content;">
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-dark);">Order Summary</h3>
+        
+        <div id="order-items" style="margin-bottom: 1.5rem;">
+          <!-- Cart items will be injected here -->
+        </div>
+        
+        <div style="border-top: 2px solid var(--border); padding-top: 1rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+            <span>Subtotal</span>
+            <span id="subtotal">KSh 0.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+            <span>Shipping</span>
+            <span>Free</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: 700; color: var(--sage);">
+            <span>Total</span>
+            <span id="total">KSh 0.00</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo">Kodwaina</span>
+        <p>Natural footwear for every journey.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>Help</h4>
+        <ul>
+          <li><a href="cart.html">Your Cart</a></li>
+          <li><a href="contact.html">Returns</a></li>
+          <li><a href="contact.html">Shipping Info</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Kodwaina Shoe Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/checkout.js"></script>
+</body>
+</html>
